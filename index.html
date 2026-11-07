@@ -58,7 +58,8 @@
     nav.bands a:hover { background: #f0f0f0; }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      /* 色名と HSL の値が 1 行に収まる幅（特に長い色名は .long で小さくする） */
+      grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
       gap: 1rem;
     }
     .swatch {
@@ -77,7 +78,7 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 0.1rem;
-      padding: 0.9rem 1rem 1rem;
+      padding: 0.9rem 0.95rem 1rem;
       font-size: 0.9rem;
       line-height: 1.4;
     }
@@ -91,12 +92,17 @@
       margin: 0 -0.35rem;
       cursor: pointer;
       text-align: left;
+      white-space: nowrap;
     }
     .copy:hover { background: #f0f0f0; }
     .copy:focus-visible { outline: 2px solid #4a90e2; }
     .copy.name {
       font-size: 1.05rem;
       font-weight: bold;
+    }
+    .copy.name.long {
+      font-size: 0.85rem;
+      line-height: calc(1.05rem * 1.4); /* ほかの色名と同じ行の高さに */
     }
     .copy.hex,
     .copy.rgb,
@@ -156,7 +162,7 @@
     <div class="swatch"><div class="chip" style="background:lemonchiffon"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">lemonchiffon</button><button type="button" class="copy hex" title="クリックでコピー">#FFFACD</button></div></div>
     <div class="swatch"><div class="chip" style="background:ivory"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">ivory</button><button type="button" class="copy hex" title="クリックでコピー">#FFFFF0</button></div></div>
     <div class="swatch"><div class="chip" style="background:lightyellow"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">lightyellow</button><button type="button" class="copy hex" title="クリックでコピー">#FFFFE0</button></div></div>
-    <div class="swatch"><div class="chip" style="background:lightgoldenrodyellow"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">lightgoldenrodyellow</button><button type="button" class="copy hex" title="クリックでコピー">#FAFAD2</button></div></div>
+    <div class="swatch"><div class="chip" style="background:lightgoldenrodyellow"></div><div class="label"><button type="button" class="copy name long" title="クリックでコピー">lightgoldenrodyellow</button><button type="button" class="copy hex" title="クリックでコピー">#FAFAD2</button></div></div>
     <div class="swatch"><div class="chip" style="background:yellow"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">yellow</button><button type="button" class="copy hex" title="クリックでコピー">#FFFF00</button></div></div>
     <div class="swatch"><div class="chip" style="background:beige"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">beige</button><button type="button" class="copy hex" title="クリックでコピー">#F5F5DC</button></div></div>
     <div class="swatch"><div class="chip" style="background:honeydew"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">honeydew</button><button type="button" class="copy hex" title="クリックでコピー">#F0FFF0</button></div></div>
@@ -186,7 +192,7 @@
     <div class="swatch"><div class="chip" style="background:lightgreen"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">lightgreen</button><button type="button" class="copy hex" title="クリックでコピー">#90EE90</button></div></div>
     <div class="swatch"><div class="chip" style="background:lime"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">lime</button><button type="button" class="copy hex" title="クリックでコピー">#00FF00</button></div></div>
     <div class="swatch"><div class="chip" style="background:springgreen"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">springgreen</button><button type="button" class="copy hex" title="クリックでコピー">#00FF7F</button></div></div>
-    <div class="swatch"><div class="chip" style="background:mediumspringgreen"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">mediumspringgreen</button><button type="button" class="copy hex" title="クリックでコピー">#00FA9A</button></div></div>
+    <div class="swatch"><div class="chip" style="background:mediumspringgreen"></div><div class="label"><button type="button" class="copy name long" title="クリックでコピー">mediumspringgreen</button><button type="button" class="copy hex" title="クリックでコピー">#00FA9A</button></div></div>
     <div class="swatch"><div class="chip" style="background:aquamarine"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">aquamarine</button><button type="button" class="copy hex" title="クリックでコピー">#7FFFD4</button></div></div>
     <div class="swatch"><div class="chip" style="background:turquoise"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">turquoise</button><button type="button" class="copy hex" title="クリックでコピー">#40E0D0</button></div></div>
     <div class="swatch"><div class="chip" style="background:paleturquoise"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">paleturquoise</button><button type="button" class="copy hex" title="クリックでコピー">#AFEEEE</button></div></div>
@@ -219,7 +225,7 @@
     <div class="swatch"><div class="chip" style="background:yellowgreen"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">yellowgreen</button><button type="button" class="copy hex" title="クリックでコピー">#9ACD32</button></div></div>
     <div class="swatch"><div class="chip" style="background:darkseagreen"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">darkseagreen</button><button type="button" class="copy hex" title="クリックでコピー">#8FBC8F</button></div></div>
     <div class="swatch"><div class="chip" style="background:limegreen"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">limegreen</button><button type="button" class="copy hex" title="クリックでコピー">#32CD32</button></div></div>
-    <div class="swatch"><div class="chip" style="background:mediumaquamarine"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">mediumaquamarine</button><button type="button" class="copy hex" title="クリックでコピー">#66CDAA</button></div></div>
+    <div class="swatch"><div class="chip" style="background:mediumaquamarine"></div><div class="label"><button type="button" class="copy name long" title="クリックでコピー">mediumaquamarine</button><button type="button" class="copy hex" title="クリックでコピー">#66CDAA</button></div></div>
     <div class="swatch"><div class="chip" style="background:mediumturquoise"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">mediumturquoise</button><button type="button" class="copy hex" title="クリックでコピー">#48D1CC</button></div></div>
     <div class="swatch"><div class="chip" style="background:darkturquoise"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">darkturquoise</button><button type="button" class="copy hex" title="クリックでコピー">#00CED1</button></div></div>
     <div class="swatch"><div class="chip" style="background:deepskyblue"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">deepskyblue</button><button type="button" class="copy hex" title="クリックでコピー">#00BFFF</button></div></div>

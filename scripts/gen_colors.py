@@ -171,6 +171,8 @@ DROP = {"aqua", "fuchsia", "darkgrey", "darkslategrey", "dimgrey", "grey",
 
 
 BAND_TITLES = ["とても明るい", "明るい", "中くらい", "暗い", "とても暗い"]
+# この文字数以上の色名は、カードに収まるよう少し小さく表示する
+LONG_NAME = 16
 BAND_IDS = ["very-light", "light", "medium", "dark", "very-dark"]
 START = "  <!-- swatches:start -->"
 END = "  <!-- swatches:end -->"
@@ -218,7 +220,7 @@ def main(index_path):
         parts.append('  <div class="grid">')
         parts += [
             f'    <div class="swatch"><div class="chip" style="background:{n}"></div>'
-            f'<div class="label">{btn.format(cls="name", text=n)}{btn.format(cls="hex", text=h)}</div></div>'
+            f'<div class="label">{btn.format(cls="name long" if len(n) >= LONG_NAME else "name", text=n)}{btn.format(cls="hex", text=h)}</div></div>'
             for n, h in band
         ]
         parts.append('  </div>')
