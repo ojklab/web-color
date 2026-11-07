@@ -25,21 +25,133 @@
     }
     .swatch .chip { height: 80px; }
     .swatch .label {
-      padding: 0.5rem;
-      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.1rem;
+      padding: 0.9rem 1rem 1rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
     }
-    .swatch code { color: #666; }
+    .copy {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      border-radius: 4px;
+      padding: 0.15rem 0.35rem;
+      margin: 0 -0.35rem;
+      cursor: pointer;
+      text-align: left;
+    }
+    .copy:hover { background: #f0f0f0; }
+    .copy:focus-visible { outline: 2px solid #4a90e2; }
+    .copy.name {
+      font-size: 1.05rem;
+      font-weight: bold;
+    }
+    .copy.hex,
+    .copy.rgb,
+    .copy.hsl {
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .copy.hex { margin-top: 0.4rem; }
+    .copy.copied { background: #e8f5e9; }
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 1.5rem;
+      transform: translate(-50%, 1rem);
+      background: #222;
+      color: #fff;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
   </style>
 </head>
 <body>
   <h1>ウェブカラー見本</h1>
   <p>準備中です。</p>
   <div class="grid">
-    <div class="swatch"><div class="chip" style="background:red"></div><div class="label">red<br><code>#FF0000</code></div></div>
-    <div class="swatch"><div class="chip" style="background:green"></div><div class="label">green<br><code>#008000</code></div></div>
-    <div class="swatch"><div class="chip" style="background:blue"></div><div class="label">blue<br><code>#0000FF</code></div></div>
-    <div class="swatch"><div class="chip" style="background:orange"></div><div class="label">orange<br><code>#FFA500</code></div></div>
-    <div class="swatch"><div class="chip" style="background:rebeccapurple"></div><div class="label">rebeccapurple<br><code>#663399</code></div></div>
+    <div class="swatch"><div class="chip" style="background:red"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">red</button><button type="button" class="copy hex" title="クリックでコピー">#FF0000</button></div></div>
+    <div class="swatch"><div class="chip" style="background:green"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">green</button><button type="button" class="copy hex" title="クリックでコピー">#008000</button></div></div>
+    <div class="swatch"><div class="chip" style="background:blue"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">blue</button><button type="button" class="copy hex" title="クリックでコピー">#0000FF</button></div></div>
+    <div class="swatch"><div class="chip" style="background:orange"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">orange</button><button type="button" class="copy hex" title="クリックでコピー">#FFA500</button></div></div>
+    <div class="swatch"><div class="chip" style="background:rebeccapurple"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">rebeccapurple</button><button type="button" class="copy hex" title="クリックでコピー">#663399</button></div></div>
   </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script>
+    // 各色の 16 進数から RGB と HSL を求めて、コピーできるボタンとして追加する
+    function hexToRgb(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+
+    function rgbToHsl([r, g, b]) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const d = max - min;
+      const l = (max + min) / 2;
+      let h = 0, s = 0;
+      if (d !== 0) {
+        s = d / (1 - Math.abs(2 * l - 1));
+        if (max === r) h = ((g - b) / d) % 6;
+        else if (max === g) h = (b - r) / d + 2;
+        else h = (r - g) / d + 4;
+        h = (h * 60 + 360) % 360;
+      }
+      return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
+    }
+
+    function makeCopyButton(cls, text) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `copy ${cls}`;
+      btn.title = 'クリックでコピー';
+      btn.textContent = text;
+      return btn;
+    }
+
+    document.querySelectorAll('.swatch .label').forEach((label) => {
+      const hex = label.querySelector('.hex').textContent.trim();
+      const rgb = hexToRgb(hex);
+      const [h, s, l] = rgbToHsl(rgb);
+      label.append(
+        makeCopyButton('rgb', `rgb(${rgb.join(' ')})`),
+        makeCopyButton('hsl', `hsl(${h} ${s}% ${l}%)`)
+      );
+    });
+
+    const toast = document.getElementById('toast');
+    let toastTimer;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+    }
+
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.copy');
+      if (!btn) return;
+      try {
+        const text = btn.textContent.trim();
+        await navigator.clipboard.writeText(text);
+        btn.classList.add('copied');
+        clearTimeout(btn._timer);
+        btn._timer = setTimeout(() => btn.classList.remove('copied'), 1200);
+        showToast(`「${text}」をコピーしました`);
+      } catch (err) {
+        alert('コピーできませんでした: ' + err);
+      }
+    });
+  </script>
 </body>
 </html>
