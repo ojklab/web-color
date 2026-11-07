@@ -171,6 +171,7 @@ DROP = {"aqua", "fuchsia", "darkgrey", "darkslategrey", "dimgrey", "grey",
 
 
 BAND_TITLES = ["とても明るい", "明るい", "中くらい", "暗い", "とても暗い"]
+BAND_IDS = ["very-light", "light", "medium", "dark", "very-dark"]
 START = "  <!-- swatches:start -->"
 END = "  <!-- swatches:end -->"
 
@@ -207,10 +208,13 @@ def main(index_path):
     bands = [colors[len(colors) * i // 5: len(colors) * (i + 1) // 5] for i in range(5)]
 
     btn = '<button type="button" class="copy {cls}" title="クリックでコピー">{text}</button>'
-    parts = []
-    for title, band in zip(BAND_TITLES, bands):
+    # 各段の見出しへのページ内リンク
+    parts = ['  <nav class="bands" aria-label="明るさの段">']
+    parts += [f'    <a href="#{bid}">{title}</a>' for bid, title in zip(BAND_IDS, BAND_TITLES)]
+    parts.append('  </nav>')
+    for bid, title, band in zip(BAND_IDS, BAND_TITLES, bands):
         band.sort(key=hue_key)
-        parts.append(f'  <h2>{title}（{len(band)} 色）</h2>')
+        parts.append(f'  <h2 id="{bid}">{title}（{len(band)} 色）</h2>')
         parts.append('  <div class="grid">')
         parts += [
             f'    <div class="swatch"><div class="chip" style="background:{n}"></div>'

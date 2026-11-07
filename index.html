@@ -7,17 +7,55 @@
   <style>
     body {
       font-family: system-ui, -apple-system, "Hiragino Sans", sans-serif;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-      max-width: 960px;
+      margin: 0;
+      padding-bottom: 2rem;
       color: #222;
       background: #f2f2f2;
     }
-    h1 { margin-top: 0; }
+    /* 中身は最大 960px で中央に。背景はページの端まで広げる */
+    body > * {
+      padding-inline: max(1rem, (100% - 960px) / 2);
+    }
+    /* ページ最上部の 139 色の帯 */
+    #stripe {
+      display: flex;
+      height: 1rem;
+      padding-inline: 0;
+    }
+    #stripe span { flex: 1; }
+    /* タイトルからページ内リンクまでを白いヘッダーに */
+    header {
+      background: #fff;
+      padding-block: 1.5rem 0.25rem;
+    }
+    h1 { margin: 0 0 0.5rem; }
+    header p { margin: 0; }
     h2 {
       margin: 2.5rem 0 1rem;
       font-size: 1.15rem;
+      scroll-margin-top: 4.75rem; /* 上に固定したリンクに隠れないように */
     }
+    nav.bands {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-block: 0.75rem;
+      background: #fff;
+      border-bottom: 1px solid #d6d6d6;
+    }
+    nav.bands a {
+      padding: 0.3rem 0.8rem;
+      border: 1px solid #d6d6d6;
+      border-radius: 999px;
+      background: #fff;
+      color: inherit;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    nav.bands a:hover { background: #f0f0f0; }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -87,10 +125,20 @@
   </style>
 </head>
 <body>
-  <h1>ウェブカラー見本</h1>
-  <p>CSS の色名 139 色を明るさで 5 段階に分け、それぞれの中で色相順に並べています。色名や値をクリックするとコピーできます。</p>
+  <div id="stripe" aria-hidden="true"></div>
+  <header>
+    <h1>ウェブカラー見本</h1>
+    <p>CSS の色名 139 色を明るさで 5 段階に分け、それぞれの中で色相順に並べています。色名や値をクリックするとコピーできます。</p>
+  </header>
   <!-- swatches:start -->
-  <h2>とても明るい（27 色）</h2>
+  <nav class="bands" aria-label="明るさの段">
+    <a href="#very-light">とても明るい</a>
+    <a href="#light">明るい</a>
+    <a href="#medium">中くらい</a>
+    <a href="#dark">暗い</a>
+    <a href="#very-dark">とても暗い</a>
+  </nav>
+  <h2 id="very-light">とても明るい（27 色）</h2>
   <div class="grid">
     <div class="swatch"><div class="chip" style="background:white"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">white</button><button type="button" class="copy hex" title="クリックでコピー">#FFFFFF</button></div></div>
     <div class="swatch"><div class="chip" style="background:whitesmoke"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">whitesmoke</button><button type="button" class="copy hex" title="クリックでコピー">#F5F5F5</button></div></div>
@@ -120,7 +168,7 @@
     <div class="swatch"><div class="chip" style="background:lavender"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">lavender</button><button type="button" class="copy hex" title="クリックでコピー">#E6E6FA</button></div></div>
     <div class="swatch"><div class="chip" style="background:lavenderblush"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">lavenderblush</button><button type="button" class="copy hex" title="クリックでコピー">#FFF0F5</button></div></div>
   </div>
-  <h2>明るい（28 色）</h2>
+  <h2 id="light">明るい（28 色）</h2>
   <div class="grid">
     <div class="swatch"><div class="chip" style="background:gainsboro"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">gainsboro</button><button type="button" class="copy hex" title="クリックでコピー">#DCDCDC</button></div></div>
     <div class="swatch"><div class="chip" style="background:lightgray"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">lightgray</button><button type="button" class="copy hex" title="クリックでコピー">#D3D3D3</button></div></div>
@@ -151,7 +199,7 @@
     <div class="swatch"><div class="chip" style="background:pink"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">pink</button><button type="button" class="copy hex" title="クリックでコピー">#FFC0CB</button></div></div>
     <div class="swatch"><div class="chip" style="background:lightpink"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">lightpink</button><button type="button" class="copy hex" title="クリックでコピー">#FFB6C1</button></div></div>
   </div>
-  <h2>中くらい（28 色）</h2>
+  <h2 id="medium">中くらい（28 色）</h2>
   <div class="grid">
     <div class="swatch"><div class="chip" style="background:silver"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">silver</button><button type="button" class="copy hex" title="クリックでコピー">#C0C0C0</button></div></div>
     <div class="swatch"><div class="chip" style="background:darkgray"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">darkgray</button><button type="button" class="copy hex" title="クリックでコピー">#A9A9A9</button></div></div>
@@ -182,7 +230,7 @@
     <div class="swatch"><div class="chip" style="background:orchid"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">orchid</button><button type="button" class="copy hex" title="クリックでコピー">#DA70D6</button></div></div>
     <div class="swatch"><div class="chip" style="background:hotpink"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">hotpink</button><button type="button" class="copy hex" title="クリックでコピー">#FF69B4</button></div></div>
   </div>
-  <h2>暗い（28 色）</h2>
+  <h2 id="dark">暗い（28 色）</h2>
   <div class="grid">
     <div class="swatch"><div class="chip" style="background:gray"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">gray</button><button type="button" class="copy hex" title="クリックでコピー">#808080</button></div></div>
     <div class="swatch"><div class="chip" style="background:rosybrown"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">rosybrown</button><button type="button" class="copy hex" title="クリックでコピー">#BC8F8F</button></div></div>
@@ -213,7 +261,7 @@
     <div class="swatch"><div class="chip" style="background:palevioletred"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">palevioletred</button><button type="button" class="copy hex" title="クリックでコピー">#DB7093</button></div></div>
     <div class="swatch"><div class="chip" style="background:crimson"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">crimson</button><button type="button" class="copy hex" title="クリックでコピー">#DC143C</button></div></div>
   </div>
-  <h2>とても暗い（28 色）</h2>
+  <h2 id="very-dark">とても暗い（28 色）</h2>
   <div class="grid">
     <div class="swatch"><div class="chip" style="background:dimgray"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">dimgray</button><button type="button" class="copy hex" title="クリックでコピー">#696969</button></div></div>
     <div class="swatch"><div class="chip" style="background:black"></div><div class="label"><button type="button" class="copy name" title="クリックでコピー">black</button><button type="button" class="copy hex" title="クリックでコピー">#000000</button></div></div>
@@ -286,6 +334,15 @@
         makeCopyButton('rgb', `rgb(${rgb.join(' ')})`),
         makeCopyButton('hsl', `hsl(${h} ${s}% ${l}%)`)
       );
+    });
+
+    // ページ最上部の帯: 色見本と同じ順に 139 色を並べる
+    const stripe = document.getElementById('stripe');
+    document.querySelectorAll('.swatch .name').forEach((btn) => {
+      const span = document.createElement('span');
+      span.style.background = btn.textContent.trim();
+      span.title = btn.textContent.trim();
+      stripe.append(span);
     });
 
     const toast = document.getElementById('toast');
