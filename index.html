@@ -12,9 +12,10 @@
       color: #222;
       background: #f2f2f2;
     }
-    /* 中身は最大 960px で中央に。背景はページの端まで広げる */
+    /* 中身は画面幅いっぱいに広げる。左右の余白は画面幅の 8% の割合で切れ目なく広がり、
+       スマートフォン（375px）で 1rem、約 1780px 以上で上限の 8rem になる */
     body > * {
-      padding-inline: max(1rem, (100% - 960px) / 2);
+      padding-inline: clamp(1rem, 8vw - 0.875rem, 8rem);
     }
     /* ページ最上部の 139 色の帯 */
     #stripe {
