@@ -1,8 +1,11 @@
 """CSS 名前付きカラー（148 個）から同色の別名を除いた 139 色の色見本を作り、
 index.html の <!-- swatches:start --> と <!-- swatches:end --> の間を書き換える。
 
-並べ方: 見た目の明るさ（OKLab の L）で色数がほぼ同じ 5 段階に分け、
-各段の中は無彩色（白・灰・黒）を先頭に明るい順、そのあと色相順。
+並べ方は 2 通り書き出し、ページのスイッチで切り替える。
+- 明るさ: 見た目の明るさ（OKLab の L）で色数がほぼ同じ 5 段階に分け、
+  各段の中は無彩色（白・灰・黒）を先頭に明るい順、そのあと色相順。
+- 色相: 先頭に無彩色（白・灰・黒）の段、残りの有彩色を色相順に色数がほぼ同じ 5 段階に分け、
+  各段の中は明るい順。
 
 使い方（リポジトリーのルートで）:
     python3 scripts/gen_colors.py
@@ -170,10 +173,15 @@ DROP = {"aqua", "fuchsia", "darkgrey", "darkslategrey", "dimgrey", "grey",
         "lightgrey", "lightslategrey", "slategrey"}
 
 
-BAND_TITLES = ["とても明るい", "明るい", "中くらい", "暗い", "とても暗い"]
+# 明るさで分けるときの段（見出し, ID）
+LIGHTNESS_BANDS = [("とても明るい", "very-light"), ("明るい", "light"), ("中くらい", "medium"),
+                   ("暗い", "dark"), ("とても暗い", "very-dark")]
+# 色相で分けるときの段。先頭は無彩色、残りは有彩色を色相順に色数をそろえて 5 等分
+NEUTRAL_BAND = ("灰系", "gray")
+HUE_BANDS = [("赤系", "red"), ("黄系", "yellow"), ("緑系", "green"),
+             ("青系", "blue"), ("紫系", "purple")]
 # この文字数以上の色名は、カードに収まるよう少し小さく表示する
 LONG_NAME = 16
-BAND_IDS = ["very-light", "light", "medium", "dark", "very-dark"]
 START = "  <!-- swatches:start -->"
 END = "  <!-- swatches:end -->"
 
@@ -198,31 +206,67 @@ def main(index_path):
         s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b
         return 0.2104542553 * l ** (1 / 3) + 0.7936177850 * m ** (1 / 3) - 0.0040720468 * s ** (1 / 3)
 
-    def hue_key(item):
-        hue, light, sat = colorsys.rgb_to_hls(*parse(item[1]))
-        # 段の中では無彩色（白・灰・黒）を先に明るい順、そのあと色相順
+    def hls(item):
+        return colorsys.rgb_to_hls(*parse(item[1]))
+
+    def by_hue(item):
+        hue, light, sat = hls(item)
+        # 無彩色（白・灰・黒）は先に明るい順、そのあと色相順
         if sat == 0:
             return (0, -light)
         return (1, hue)
 
-    # 明るい順に並べ、色数がほぼ同じになるよう 5 段階に分ける
-    colors.sort(key=lambda c: -oklab_lightness(c[1]))
-    bands = [colors[len(colors) * i // 5: len(colors) * (i + 1) // 5] for i in range(5)]
+    def by_lightness(item):
+        return -oklab_lightness(item[1])
+
+    def split5(items):
+        return [items[len(items) * i // 5: len(items) * (i + 1) // 5] for i in range(5)]
+
+    # 明るさ: 明るい順に並べて色数がほぼ同じ 5 段階に分け、各段の中は色相順
+    lightness_groups = [
+        (title, bid, sorted(band, key=by_hue))
+        for (title, bid), band in zip(LIGHTNESS_BANDS, split5(sorted(colors, key=by_lightness)))
+    ]
+
+    # 色相: 先頭に無彩色、残りを色相順に 5 等分。各段の中は明るい順
+    neutral = [c for c in colors if hls(c)[2] == 0]
+    chromatic = sorted((c for c in colors if hls(c)[2] != 0), key=lambda c: hls(c)[0])
+    hue_groups = [(*NEUTRAL_BAND, sorted(neutral, key=by_lightness))] + [
+        (title, bid, sorted(band, key=by_lightness))
+        for (title, bid), band in zip(HUE_BANDS, split5(chromatic))
+    ]
+
+    views = [("lightness", "明るさ", lightness_groups), ("hue", "色相", hue_groups)]
 
     btn = '<button type="button" class="copy {cls}" title="クリックでコピー">{text}</button>'
-    # 各段の見出しへのページ内リンク
-    parts = ['  <nav class="bands" aria-label="明るさの段">']
-    parts += [f'    <a href="#{bid}">{title}</a>' for bid, title in zip(BAND_IDS, BAND_TITLES)]
+
+    def swatch(n, h):
+        name_cls = "name long" if len(n) >= LONG_NAME else "name"
+        return (f'      <div class="swatch"><div class="chip" style="background:{n}"></div>'
+                f'<div class="label">{btn.format(cls=name_cls, text=n)}{btn.format(cls="hex", text=h)}</div></div>')
+
+    # 上に固定する帯: 明るさ／色相の切り替えスイッチと、各段の見出しへのページ内リンク
+    parts = [
+        '  <nav class="bands" aria-label="色の段">',
+        '    <button type="button" class="view-toggle" role="switch" aria-checked="false" aria-label="色相で分けて表示">',
+        '      <span class="opt">明るさ</span><span class="track"><span class="knob"></span></span><span class="opt">色相</span>',
+        '    </button>',
+    ]
+    for i, (view, _, groups) in enumerate(views):
+        hidden = "" if i == 0 else " hidden"
+        parts.append(f'    <div class="links" data-view="{view}"{hidden}>')
+        parts += [f'      <a href="#{bid}">{title}</a>' for title, bid, _ in groups]
+        parts.append('    </div>')
     parts.append('  </nav>')
-    for bid, title, band in zip(BAND_IDS, BAND_TITLES, bands):
-        band.sort(key=hue_key)
-        parts.append(f'  <h2 id="{bid}">{title}（{len(band)} 色）</h2>')
-        parts.append('  <div class="grid">')
-        parts += [
-            f'    <div class="swatch"><div class="chip" style="background:{n}"></div>'
-            f'<div class="label">{btn.format(cls="name long" if len(n) >= LONG_NAME else "name", text=n)}{btn.format(cls="hex", text=h)}</div></div>'
-            for n, h in band
-        ]
+
+    for i, (view, label, groups) in enumerate(views):
+        hidden = "" if i == 0 else " hidden"
+        parts.append(f'  <div class="view" data-view="{view}"{hidden}>')
+        for title, bid, band in groups:
+            parts.append(f'    <h2 id="{bid}">{title}（{len(band)} 色）</h2>')
+            parts.append('    <div class="grid">')
+            parts += [swatch(n, h) for n, h in band]
+            parts.append('    </div>')
         parts.append('  </div>')
 
     html = open(index_path, encoding="utf-8").read()
@@ -234,8 +278,10 @@ def main(index_path):
     html, count = re.subn(pattern, lambda _: block, html, flags=re.S)
     assert count == 1
     open(index_path, "w", encoding="utf-8").write(html)
-    for title, band in zip(BAND_TITLES, bands):
-        print(title, len(band), " ".join(n for n, _ in band))
+    for _, label, groups in views:
+        print(f"[{label}]")
+        for title, _, band in groups:
+            print(" ", title, len(band), " ".join(n for n, _ in band))
 
 
 if __name__ == "__main__":
